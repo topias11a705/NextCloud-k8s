@@ -1,0 +1,15 @@
+apiVersion: v2
+name: nextcloud-stack
+description: Nextcloud with PostgreSQL, Nginx, Prometheus, and Grafana
+type: application
+version: 1.0.0
+appVersion: "1.0"
+keywords:
+  - nextcloud
+  - postgresql
+  - nginx
+  - prometheus
+  - grafana
+maintainers:
+  - name: Your Name
+    email: your.email@example.com

@@ -1,0 +1,87 @@
+{{- if .Values.nginx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: {{ .Values.namespace }}
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/access.log main;
+        error_log /var/log/nginx/error.log warn;
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        client_max_body_size 512M;
+
+        upstream nextcloud {
+            server nextcloud:80;
+        }
+
+        upstream grafana {
+            server grafana:3000;
+        }
+
+        upstream prometheus {
+            server prometheus:9090;
+        }
+
+        server {
+            listen 80;
+            server_name {{ .Values.ingress.host }};
+
+            location / {
+                proxy_pass http://nextcloud;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_max_temp_file_size 0;
+                
+                # WebDAV support
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_buffering off;
+                proxy_request_buffering off;
+            }
+
+            location /grafana/ {
+                rewrite ^/grafana/(.*) /$1 break;
+                proxy_pass http://grafana;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            location /prometheus/ {
+                proxy_pass http://prometheus;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            location /.well-known/carddav {
+                return 301 $scheme://$host/remote.php/dav;
+            }
+
+            location /.well-known/caldav {
+                return 301 $scheme://$host/remote.php/dav;
+            }
+        }
+    }
+{{- end }}

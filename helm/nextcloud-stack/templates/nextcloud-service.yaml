@@ -1,0 +1,17 @@
+{{- if .Values.nextcloud.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: nextcloud
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http
+  selector:
+    app: nextcloud
+{{- end }}

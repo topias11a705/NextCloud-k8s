@@ -1,0 +1,90 @@
+# デフォルト値の設定
+
+namespace: nextcloud
+
+# PostgreSQL設定
+postgresql:
+  enabled: true
+  image: postgres:15-alpine
+  database: nextcloud
+  user: nextcloud
+  password: changeme  # これは上書きされる
+  storage: 10Gi
+  storageClass: ""  # デフォルトのStorageClassを使用
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Nextcloud設定
+nextcloud:
+  enabled: true
+  image: nextcloud:latest
+  adminUser: admin
+  adminPassword: changeme  # これは上書きされる
+  storage: 20Gi
+  storageClass: ""
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  replicas: 2
+
+# Nginx設定
+nginx:
+  enabled: true
+  image: nginx:alpine
+  replicas: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# Prometheus設定
+prometheus:
+  enabled: true
+  image: prom/prometheus:latest
+  storage: 5Gi
+  storageClass: ""
+  retention: 15d
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+# Grafana設定
+grafana:
+  enabled: true
+  image: grafana/grafana:latest
+  adminUser: admin
+  adminPassword: changeme  # これは上書きされる
+  storage: 2Gi
+  storageClass: ""
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "200m"
+
+# Ingress設定
+ingress:
+  enabled: true
+  className: nginx
+  host: nextcloud.example.com
+  tls:
+    enabled: false
+    secretName: nextcloud-tls

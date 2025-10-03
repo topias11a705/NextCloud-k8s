@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-config
+  namespace: {{ .Values.namespace }}
+data:
+  config.php: |
+    <?php
+    $CONFIG = array (
+      'memcache.local' => '\\OC\\Memcache\\APCu',
+      'default_phone_region' => 'JP',
+      'maintenance' => false,
+    );
